@@ -30,11 +30,23 @@ def get_chat_model() -> Any:
     if config.LLM_PROVIDER == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
 
-        return ChatGoogleGenerativeAI(
+        primary = ChatGoogleGenerativeAI(
             model=config.GEMINI_CHAT_MODEL,
             temperature=config.LLM_TEMPERATURE,
             api_key=config.GEMINI_API_KEY,
         )
+        # Automatic fallback models in case of quota exhaustion (e.g., 429 on free tier previews)
+        fallback_candidates = ["gemini-flash-latest", "gemini-3.8-flash"]
+        fallbacks = [
+            ChatGoogleGenerativeAI(
+                model=m,
+                temperature=config.LLM_TEMPERATURE,
+                api_key=config.GEMINI_API_KEY,
+            )
+            for m in fallback_candidates
+            if m != config.GEMINI_CHAT_MODEL
+        ]
+        return primary.with_fallbacks(fallbacks) if fallbacks else primary
 
     if config.LLM_PROVIDER == "groq":
         from langchain_groq import ChatGroq

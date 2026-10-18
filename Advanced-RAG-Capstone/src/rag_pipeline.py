@@ -210,7 +210,7 @@ def generate_answer(
     except Exception as error:
         logger.error("Answer generation failed: %s", error)
         return (
-            "Sorry, the OpenAI request failed. Check your API key, your "
+            "Sorry, the AI model request failed. Check your API key, your "
             f"internet connection and your usage limits.\n\nDetails: {error}"
         )
 

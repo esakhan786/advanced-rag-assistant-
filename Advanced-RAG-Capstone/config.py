@@ -96,7 +96,7 @@ else:
     LLM_PROVIDER = "gemini"
 
 # Gemini chat model (Free tier via Google AI Studio)
-GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-2.5-flash")
+GEMINI_CHAT_MODEL = os.getenv("GEMINI_CHAT_MODEL", "gemini-flash-latest")
 
 # Groq chat model (Free tier)
 GROQ_CHAT_MODEL = os.getenv("GROQ_CHAT_MODEL", "llama-3.3-70b-versatile")
