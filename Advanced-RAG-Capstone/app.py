@@ -115,15 +115,8 @@ def render_sidebar() -> bool:
     """
     with st.sidebar:
         st.markdown("### 🧭 Navigation")
-        nav_options = ["🏠 Project Overview", "💬 Live Assistant"]
-        chosen_page = st.radio(
-            "Navigation Menu",
-            nav_options,
-            index=nav_options.index(st.session_state.current_page) if st.session_state.current_page in nav_options else 0,
-            label_visibility="collapsed",
-        )
-        if chosen_page != st.session_state.current_page:
-            st.session_state.current_page = chosen_page
+        if st.button("🏠 ← Return to Landing Page", key="sidebar_back_btn", use_container_width=True):
+            st.session_state.current_page = "🏠 Project Overview"
             st.rerun()
 
         st.divider()
@@ -331,14 +324,45 @@ def render_sources(sources: list) -> None:
 def main() -> None:
     """
     Draw the page and handle one chat turn per rerun.
-
-    This is the entry point Streamlit executes. It keeps the layout simple:
-    a sidebar for controls, a chat transcript in the middle, and an input box
-    at the bottom.
     """
     init_session_state()
 
+    def switch_to_chat():
+        st.session_state.current_page = "💬 Live Assistant"
+        st.rerun()
+
+    # Route 1: Landing Page (Project Overview - Clean, Full-Width, No Sidebar)
+    if st.session_state.current_page == "🏠 Project Overview":
+        # Completely hide Streamlit sidebar and its toggle on the landing page
+        st.markdown(
+            """
+            <style>
+            [data-testid="stSidebar"], section[data-testid="stSidebar"], [data-testid="collapsedControl"] {
+                display: none !important;
+            }
+            .main .block-container {
+                max-width: 1240px !important;
+                padding-top: 1.5rem !important;
+                padding-bottom: 5rem !important;
+                padding-left: 2rem !important;
+                padding-right: 2rem !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+        render_landing_page(get_pipeline, answer_question, switch_to_chat)
+        return
+
+    # Route 2: Full Interactive Multi-turn Chat Assistant (With Sidebar)
     show_debug = render_sidebar()
+
+    # Top return button
+    top_col1, top_col2 = st.columns([1.5, 4.5])
+    with top_col1:
+        if st.button("🏠 ← Return to Landing Page", key="chat_top_back_landing", use_container_width=True):
+            st.session_state.current_page = "🏠 Project Overview"
+            st.rerun()
 
     if config.LLM_PROVIDER == "gemini":
         has_key = bool(config.GEMINI_API_KEY)
@@ -362,20 +386,10 @@ def main() -> None:
     if not index_exists():
         st.info(
             "Nothing is indexed yet. Use **Build Vector DB** in the sidebar to "
-            "index the sample TechNova documents (or upload your own first)."
+            "index the sample documents (or upload your own first)."
         )
         return
 
-    def switch_to_chat():
-        st.session_state.current_page = "💬 Live Assistant"
-        st.rerun()
-
-    # Route 1: Recruiter Landing Page & Architecture Showcase
-    if st.session_state.current_page == "🏠 Project Overview":
-        render_landing_page(get_pipeline, answer_question, switch_to_chat)
-        return
-
-    # Route 2: Full Interactive Multi-turn Chat Assistant
     st.title("💬 Advanced RAG Assistant")
     st.caption(
         "Hybrid retrieval · Multi-query · Parent-child chunks · "
