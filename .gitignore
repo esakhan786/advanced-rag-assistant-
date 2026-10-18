@@ -1,0 +1,25 @@
+# API Keys & Secrets
+.env
+**/.env
+*.env
+
+# Vector store index artifacts
+vectorstore/faiss/
+**/vectorstore/faiss/
+vectorstore/doc_store.json
+**/vectorstore/doc_store.json
+
+# Python artifacts
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.venv/
+venv/
+myenv/
+env/
+.pytest_cache/
+
+# OS / IDE
+.vscode/
+.idea/
+.DS_Store

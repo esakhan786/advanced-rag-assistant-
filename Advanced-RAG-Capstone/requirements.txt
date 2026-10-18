@@ -1,0 +1,31 @@
+# Core LangChain pieces
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-core>=0.3.0
+langchain-text-splitters>=0.3.0
+
+# LLM Providers (Gemini, Groq, OpenAI)
+langchain-google-genai>=2.0.0
+langchain-groq>=0.2.0
+langchain-openai>=0.2.0
+
+# Embeddings & Local Vector Database
+langchain-huggingface>=0.1.0
+sentence-transformers>=3.0.0
+faiss-cpu>=1.8.0
+rank-bm25>=0.2.2
+
+# Document loaders
+pypdf>=5.0.0
+docx2txt>=0.8
+reportlab>=4.2.0
+python-docx>=1.1.0
+
+# Web UI
+streamlit>=1.50.0
+
+# Environment variables (.env)
+python-dotenv>=1.0.0
+
+# Tests
+pytest>=8.0.0
