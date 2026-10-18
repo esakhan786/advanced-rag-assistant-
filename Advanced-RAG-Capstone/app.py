@@ -26,6 +26,7 @@ from src.indexing import (
     update_index,
 )
 from src.ingestion import SUPPORTED_EXTENSIONS, load_documents_from_folder
+from src.landing_page import render_landing_page
 from src.memory import add_exchange, clear_memory, create_memory
 from src.rag_pipeline import answer_question, load_pipeline
 from src.reranking import reranker_status
@@ -45,6 +46,8 @@ def init_session_state() -> None:
     Streamlit reruns the script constantly, so without this guard we would
     wipe the chat history on every single click.
     """
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "🏠 Project Overview"
     if "memory" not in st.session_state:
         st.session_state.memory = create_memory()
     if "messages" not in st.session_state:
@@ -111,6 +114,19 @@ def render_sidebar() -> bool:
         True if the user switched on "Show Retrieval Details".
     """
     with st.sidebar:
+        st.markdown("### 🧭 Navigation")
+        nav_options = ["🏠 Project Overview", "💬 Live Assistant"]
+        chosen_page = st.radio(
+            "Navigation Menu",
+            nav_options,
+            index=nav_options.index(st.session_state.current_page) if st.session_state.current_page in nav_options else 0,
+            label_visibility="collapsed",
+        )
+        if chosen_page != st.session_state.current_page:
+            st.session_state.current_page = chosen_page
+            st.rerun()
+
+        st.divider()
         st.header("⚙️ Configuration")
 
         # Changing this only affects the running app. To make it permanent
@@ -322,12 +338,6 @@ def main() -> None:
     """
     init_session_state()
 
-    st.title("📚 Advanced RAG Assistant")
-    st.caption(
-        "Hybrid retrieval · Multi-query · Parent-child chunks · "
-        "Cross-encoder reranking · Context refinement"
-    )
-
     show_debug = render_sidebar()
 
     if config.LLM_PROVIDER == "gemini":
@@ -355,6 +365,22 @@ def main() -> None:
             "index the sample TechNova documents (or upload your own first)."
         )
         return
+
+    def switch_to_chat():
+        st.session_state.current_page = "💬 Live Assistant"
+        st.rerun()
+
+    # Route 1: Recruiter Landing Page & Architecture Showcase
+    if st.session_state.current_page == "🏠 Project Overview":
+        render_landing_page(get_pipeline, answer_question, switch_to_chat)
+        return
+
+    # Route 2: Full Interactive Multi-turn Chat Assistant
+    st.title("💬 Advanced RAG Assistant")
+    st.caption(
+        "Hybrid retrieval · Multi-query · Parent-child chunks · "
+        "Cross-encoder reranking · Context refinement"
+    )
 
     # Redraw the conversation so far. Streamlit forgets the screen on every
     # rerun, so we repaint it from st.session_state.messages each time.
