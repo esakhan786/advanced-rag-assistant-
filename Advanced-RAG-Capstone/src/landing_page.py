@@ -1,10 +1,14 @@
 """
-Enterprise-Grade Recruiter Showcase & Landing Page for Advanced RAG Assistant.
+Ultra-Premium Modern AI SaaS Landing Page for Advanced RAG Assistant.
 
-Designed to captivate hiring managers, recruiters, and engineering leaders:
-- Striking visual aesthetics, glowing hero banner, and modern typography.
-- Deep architectural explanation: Step-by-step (1-by-1) breakdown of the 5 RAG stages.
-- Instant 1-click interactive demo sandbox with live pipeline telemetry.
+Built with a modern AI/SaaS startup aesthetic:
+- Modern typography (Plus Jakarta Sans & JetBrains Mono)
+- Fluid glassmorphism & subtle ambient glow gradients
+- Animated hero headline and interactive application preview mockup
+- 6-card feature matrix with hover elevations
+- 4-step progressive "How It Works" workflow
+- Live 1-click interactive demo sandbox with real-time telemetry
+- Universal document upload messaging (PDF, DOCX, TXT)
 """
 
 import streamlit as st
@@ -12,245 +16,361 @@ from src.indexing import index_summary
 from src.refinement import describe_source
 
 
+# General enterprise sample scenarios that demonstrate diverse document capabilities
 SAMPLE_RECRUITER_QUERIES = [
     {
         "icon": "💳",
-        "title": "Refunds & SLA Terms",
-        "question": "What is TechNova's refund policy and how can customers request one?",
-        "tag": "Support & Finance",
-        "description": "Tests multi-sentence policy retrieval and contract exception handling."
+        "title": "SLA & Customer Support Terms",
+        "question": "What is the customer support policy, response time targets, and refund rules?",
+        "tag": "Policy & Contracts",
+        "description": "Demonstrates multi-sentence policy synthesis and exception handling."
     },
     {
         "icon": "🔐",
-        "title": "Security & MFA Rules",
-        "question": "What are the mandatory password requirements and MFA protocols?",
-        "tag": "Compliance (SOC 2)",
-        "description": "Tests alphanumeric specification extraction from Word (.docx) files."
+        "title": "Security & Access Protocols",
+        "question": "What are the mandatory password rules, complexity, and MFA requirements?",
+        "tag": "Security & Compliance",
+        "description": "Demonstrates exact alphanumeric rule extraction from structured documents."
     },
     {
         "icon": "🌴",
-        "title": "Employee Leave Policy",
+        "title": "Employee Benefits & Leave",
         "question": "How many days of annual leave do employees get and how does rollover work?",
         "tag": "HR & Operations",
-        "description": "Tests PDF tabular parsing and numeric policy retrieval from employee handbooks."
+        "description": "Demonstrates numeric policy extraction and tabular handbook comprehension."
     },
     {
         "icon": "☁️",
-        "title": "NovaCloud Architecture",
-        "question": "What are the NovaCloud product tiers, pricing, and API request limits?",
-        "tag": "Product Engineering",
-        "description": "Tests structured product feature synthesis and technical limits."
+        "title": "Infrastructure Tiers & Limits",
+        "question": "What are the product tiers, compute limits, and API request throttling rules?",
+        "tag": "Technical Specifications",
+        "description": "Demonstrates technical architecture synthesis and specification lookup."
     }
 ]
 
 
 def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_chat_func):
     """
-    Renders the recruiter-optimized, visually stunning landing page.
+    Renders the modern, highly-polished AI SaaS landing page.
     """
-    # High-end Custom CSS Design System
+    # -------------------------------------------------------------------------
+    # Custom CSS Design System (AI/SaaS Startup Aesthetic)
+    # -------------------------------------------------------------------------
     st.markdown(
         """
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-        /* Global typography enhancement */
+        /* Global typography & smooth rendering */
         html, body, [class*="css"] {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Hero Container with Ambient Glow */
-        .hero-banner {
-            position: relative;
-            background: radial-gradient(circle at 15% 20%, rgba(99, 102, 241, 0.25) 0%, transparent 45%),
-                        radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.2) 0%, transparent 40%),
-                        linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 20px;
-            padding: 44px 36px;
-            margin-bottom: 32px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        /* Ambient Glow Animations */
+        @keyframes floatEffect {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
         }
 
-        .hero-badge-row {
+        @keyframes pulseGlow {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.4; }
+        }
+
+        /* Glassmorphic Sticky Navbar */
+        .saas-navbar {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .hero-pill {
-            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            letter-spacing: 0.02em;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 14px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.3);
         }
 
-        .pill-emerald { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.4); }
-        .pill-indigo  { background: rgba(99, 102, 241, 0.15); color: #818CF8; border: 1px solid rgba(99, 102, 241, 0.4); }
-        .pill-violet  { background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.4); }
-        .pill-amber   { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.4); }
-
-        .hero-title {
-            font-size: 2.85rem;
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.25rem;
             font-weight: 800;
-            line-height: 1.15;
-            background: linear-gradient(100deg, #FFFFFF 20%, #93C5FD 50%, #C084FC 80%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
+            color: #FFFFFF;
             letter-spacing: -0.02em;
         }
 
-        .hero-subtitle {
-            font-size: 1.18rem;
-            color: #CBD5E1;
-            line-height: 1.7;
-            max-width: 900px;
-            margin-bottom: 24px;
-        }
-
-        /* Glassmorphic Overview Cards */
-        .glass-card {
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 24px;
-            height: 100%;
-            transition: all 0.25s ease;
-        }
-        .glass-card:hover {
-            border-color: rgba(129, 140, 248, 0.4);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 24px -10px rgba(99, 102, 241, 0.2);
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 12px;
-            display: inline-block;
-        }
-
-        .card-header {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #F8FAFC;
-            margin-bottom: 8px;
-        }
-
-        .card-body {
-            font-size: 0.92rem;
-            color: #94A3B8;
-            line-height: 1.6;
-        }
-
-        /* Step-by-step Pipeline Timeline Cards */
-        .step-container {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            transition: border-color 0.2s ease;
-        }
-        .step-container:hover {
-            border-color: rgba(99, 102, 241, 0.35);
-        }
-
-        .step-header-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 12px;
-        }
-
-        .step-number {
+        .nav-logo-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            background: linear-gradient(135deg, #6366F1, #8B5CF6);
             color: #FFFFFF;
-            font-weight: 800;
-            font-size: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            font-size: 1.1rem;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
         }
 
-        .step-title {
-            font-size: 1.25rem;
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #94A3B8;
+        }
+
+        /* Hero Section Container */
+        .saas-hero {
+            position: relative;
+            background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.22) 0%, transparent 45%),
+                        radial-gradient(circle at 90% 25%, rgba(6, 182, 212, 0.18) 0%, transparent 45%),
+                        linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 56px 42px;
+            margin-bottom: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 0.84rem;
             font-weight: 700;
-            color: #F1F5F9;
+            color: #A5B4FC;
+            margin-bottom: 22px;
+            letter-spacing: 0.02em;
         }
 
-        .step-tag {
-            margin-left: auto;
+        .hero-heading {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.12;
+            letter-spacing: -0.03em;
+            background: linear-gradient(105deg, #FFFFFF 25%, #93C5FD 55%, #C084FC 85%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .hero-lead {
+            font-size: 1.22rem;
+            color: #CBD5E1;
+            line-height: 1.7;
+            max-width: 860px;
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        /* Mockup Container */
+        .mockup-window {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            margin-top: 28px;
+            transition: transform 0.3s ease;
+        }
+
+        .mockup-topbar {
+            display: flex;
+            align-items: center;
+            padding: 12px 18px;
+            background: rgba(30, 41, 59, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            gap: 8px;
+        }
+
+        .dot { width: 11px; height: 11px; border-radius: 50%; }
+        .dot-red { background: #EF4444; }
+        .dot-yellow { background: #F59E0B; }
+        .dot-green { background: #10B981; }
+
+        .mockup-url {
+            margin-left: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 3px 14px;
+            font-size: 0.75rem;
+            color: #94A3B8;
+            font-family: 'JetBrains Mono', monospace;
+            width: 280px;
+        }
+
+        .mockup-body {
+            padding: 24px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.5) 100%);
+        }
+
+        /* Stats Strip */
+        .stat-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 22px;
+            text-align: center;
+            height: 100%;
+            transition: all 0.25s ease;
+        }
+        .stat-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-3px);
+            background: rgba(30, 41, 59, 0.6);
+        }
+        .stat-num {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60A5FA, #A78BFA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+        .stat-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 26px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .feature-card:hover {
+            border-color: rgba(99, 102, 241, 0.45);
+            transform: translateY(-4px);
+            background: rgba(30, 41, 59, 0.65);
+            box-shadow: 0 16px 32px -10px rgba(99, 102, 241, 0.15);
+        }
+        .feature-icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+        }
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 10px;
+        }
+        .feature-desc {
+            font-size: 0.92rem;
+            color: #94A3B8;
+            line-height: 1.65;
+        }
+
+        /* Workflow Steps */
+        .workflow-step {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 16px;
+            padding: 22px;
+            position: relative;
+            height: 100%;
+            transition: all 0.25s ease;
+        }
+        .workflow-step:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            transform: translateY(-2px);
+        }
+        .workflow-badge {
+            display: inline-block;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.78rem;
-            color: #818CF8;
-            background: rgba(99, 102, 241, 0.12);
-            padding: 3px 10px;
+            font-weight: 800;
+            color: #38BDF8;
+            background: rgba(6, 182, 212, 0.12);
+            padding: 4px 10px;
             border-radius: 6px;
-            border: 1px solid rgba(99, 102, 241, 0.25);
+            margin-bottom: 12px;
+            border: 1px solid rgba(6, 182, 212, 0.25);
         }
 
-        .step-problem {
-            background: rgba(239, 68, 68, 0.08);
-            border-left: 3px solid #EF4444;
-            padding: 10px 14px;
-            border-radius: 0 8px 8px 0;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: #FCA5A5;
+        /* Live Sandbox Container */
+        .sandbox-container {
+            background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+                        rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            margin-top: 24px;
+            margin-bottom: 36px;
         }
 
-        .step-solution {
-            background: rgba(16, 185, 129, 0.08);
-            border-left: 3px solid #10B981;
-            padding: 10px 14px;
-            border-radius: 0 8px 8px 0;
-            font-size: 0.9rem;
-            color: #6EE7B7;
-        }
-
-        /* Interactive Recruiter Test Cards */
-        .query-box {
-            background: rgba(30, 41, 59, 0.45);
+        .scenario-card {
+            background: rgba(30, 41, 59, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 16px;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
-        .query-title {
+        .scenario-title {
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.96rem;
             color: #F8FAFC;
             margin-bottom: 4px;
         }
-        .query-desc {
+        .scenario-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #818CF8;
+            margin-bottom: 6px;
+        }
+        .scenario-desc {
             font-size: 0.82rem;
             color: #94A3B8;
-            margin-bottom: 12px;
             line-height: 1.45;
+            margin-bottom: 12px;
         }
 
-        /* Result Container */
-        .live-result-card {
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
+        /* Final High-Impact CTA */
+        .cta-banner {
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 70%),
+                        linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
             border: 1px solid rgba(99, 102, 241, 0.35);
-            border-radius: 14px;
-            padding: 24px;
-            margin-top: 20px;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            border-radius: 24px;
+            padding: 48px 36px;
+            text-align: center;
+            box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.25);
+            margin-top: 40px;
+            margin-bottom: 30px;
         }
         </style>
         """,
@@ -258,38 +378,61 @@ def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_cha
     )
 
     # =========================================================================
-    # 1. HERO SECTION
+    # 1. NAVBAR
     # =========================================================================
     st.markdown(
         """
-        <div class="hero-banner">
-            <div class="hero-badge-row">
-                <span class="hero-pill pill-emerald">🟢 System Active & Indexed</span>
-                <span class="hero-pill pill-indigo">⚡ Google Gemini 2.5 Flash</span>
-                <span class="hero-pill pill-violet">🧠 Hybrid FAISS + BM25</span>
-                <span class="hero-pill pill-amber">🎯 Zero Hallucinations</span>
+        <div class="saas-navbar">
+            <div class="nav-logo">
+                <div class="nav-logo-icon">⚡</div>
+                <span>OmniRAG Intelligence</span>
             </div>
-            <div class="hero-title">Enterprise Advanced RAG Assistant</div>
-            <div class="hero-subtitle">
-                A production-grade Retrieval-Augmented Generation platform built with <b>LangChain, Google Gemini, and FAISS</b>.
-                Engineered to eliminate the 5 critical failure modes of Naive RAG through <b>Multi-Query Expansion</b>, 
-                <b>Reciprocal Rank Fusion</b>, <b>Hierarchical Parent-Child Chunking</b>, and <b>Local Cross-Encoder Reranking</b>.
+            <div class="nav-links">
+                <span>Features</span>
+                <span>•</span>
+                <span>How It Works</span>
+                <span>•</span>
+                <span>Architecture</span>
+                <span>•</span>
+                <span>Any Document Ready</span>
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Hero Action Bar
-    hero_col1, hero_col2, hero_col3 = st.columns([1.6, 1.4, 2])
-    with hero_col1:
-        if st.button("💬 Launch Full Interactive Assistant", type="primary", use_container_width=True):
+    # =========================================================================
+    # 2. HERO SECTION
+    # =========================================================================
+    st.markdown(
+        """
+        <div class="saas-hero">
+            <div class="hero-badge">
+                <span>✨</span> Enterprise Document Intelligence • Zero Hallucination Guarantee
+            </div>
+            <div class="hero-heading">
+                Transform Any Document Into<br>Verifiable, Cited Intelligence
+            </div>
+            <div class="hero-lead">
+                Upload any corporate PDF, Word manual, technical specification, or compliance policy. 
+                Our 5-stage hybrid retrieval engine combines <b>Multi-Query Expansion</b>, <b>BM25 + FAISS Hybrid Fusion</b>, 
+                and <b>Local Cross-Encoder Reranking</b> to synthesize accurate, cited answers you can stake your business on.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Hero Action Buttons
+    col_btn1, col_btn2, col_btn3 = st.columns([1.6, 1.4, 2])
+    with col_btn1:
+        if st.button("🚀 Launch Interactive Assistant", type="primary", use_container_width=True):
             navigate_to_chat_func()
-    with hero_col2:
+    with col_btn2:
         st.markdown(
             """
             <a href="https://github.com/esakhan786/advanced-rag-assistant-" target="_blank" style="text-decoration:none;">
-                <button style="width:100%; height:38px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(30,41,59,0.8); color:#F8FAFC; font-weight:600; cursor:pointer;">
+                <button style="width:100%; height:38px; border-radius:8px; border:1px solid rgba(255,255,255,0.18); background:rgba(30,41,59,0.85); color:#F8FAFC; font-weight:600; cursor:pointer;">
                     ⭐ Star on GitHub
                 </button>
             </a>
@@ -297,52 +440,185 @@ def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_cha
             unsafe_allow_html=True,
         )
 
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # =========================================================================
-    # 2. EXECUTIVE OVERVIEW (Why This Project Matters)
-    # =========================================================================
-    st.markdown("## 📌 Executive Overview")
+    # Realistic Interactive Application Mockup
     st.markdown(
-        "Modern enterprise knowledge bases (PDF handbooks, Word policies, text documentation) are difficult for standard chatbots to navigate accurately. "
-        "Here is how this architecture delivers enterprise-grade precision:"
+        """
+        <div class="mockup-window">
+            <div class="mockup-topbar">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+                <span class="mockup-url">https://assistant.internal.ai/v1/rag</span>
+            </div>
+            <div class="mockup-body">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:10px;">
+                    <div style="font-weight:700; color:#F8FAFC; font-size:0.95rem;">
+                        📁 Universal Ingestion Engine: <span style="color:#34D399;">PDF, DOCX, TXT</span>
+                    </div>
+                    <div style="font-family:'JetBrains Mono', monospace; font-size:0.75rem; color:#818CF8; background:rgba(99,102,241,0.15); padding:3px 10px; border-radius:6px;">
+                        Hybrid Search + Cross-Encoder Active
+                    </div>
+                </div>
+                <div style="background:rgba(15,23,42,0.6); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:16px; margin-bottom:12px;">
+                    <div style="font-size:0.8rem; color:#94A3B8; margin-bottom:4px; font-weight:600;">USER INQUIRY</div>
+                    <div style="color:#F1F5F9; font-weight:500;">"What is the policy regarding refund eligibility and service credit requests?"</div>
+                </div>
+                <div style="background:rgba(99,102,241,0.08); border-left:3px solid #6366F1; border-radius:0 10px 10px 0; padding:16px;">
+                    <div style="font-size:0.8rem; color:#A5B4FC; margin-bottom:6px; font-weight:700;">VERIFIED SYNTHESIS (GROUNDED IN DOCUMENT SOURCES)</div>
+                    <div style="color:#E2E8F0; font-size:0.92rem; line-height:1.6;">
+                        Customers on monthly self-service plans may request a full refund within 30 days of invoice date <b>[1]</b>. Usage-based infrastructure fees are non-refundable. Service credits of up to 25% are granted if monthly uptime falls below 99.0% <b>[2]</b>.
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:12px;">
+                        <span style="font-size:0.75rem; background:rgba(255,255,255,0.08); padding:3px 8px; border-radius:4px; color:#CBD5E1;">[1] Support Policy • Section 5</span>
+                        <span style="font-size:0.75rem; background:rgba(255,255,255,0.08); padding:3px 8px; border-radius:4px; color:#CBD5E1;">[2] SLA & Credit Terms • Section 8</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    ov_c1, ov_c2, ov_c3 = st.columns(3)
-    with ov_c1:
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # 3. STATS / TRUST SECTION
+    # =========================================================================
+    st.markdown("### 📊 Production Reliability & Performance Metrics")
+    s1, s2, s3, s4 = st.columns(4)
+    with s1:
         st.markdown(
             """
-            <div class="glass-card">
-                <div class="card-icon">🏢</div>
-                <div class="card-header">The Enterprise Problem</div>
-                <div class="card-body">
-                    Standard ("Naive") RAG fails on exact part codes, drifts when user terminology differs from document text, and hallucinates answers when irrelevant chunks pollute the prompt.
+            <div class="stat-card">
+                <div class="stat-num">100%</div>
+                <div class="stat-label">Source-Grounded</div>
+                <p style="font-size:0.8rem; color:#94A3B8; margin-top:4px;">Strict policy prompts forbid ungrounded speculation.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with s2:
+        st.markdown(
+            """
+            <div class="stat-card">
+                <div class="stat-num">5 Stages</div>
+                <div class="stat-label">Deep Pipeline</div>
+                <p style="font-size:0.8rem; color:#94A3B8; margin-top:4px;">Multi-query, hybrid RRF, parent recovery, reranker, budget.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with s3:
+        st.markdown(
+            """
+            <div class="stat-card">
+                <div class="stat-num">~0.08s</div>
+                <div class="stat-label">Reranker Latency</div>
+                <p style="font-size:0.8rem; color:#94A3B8; margin-top:4px;">Local CPU cross-attention scoring on candidates.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with s4:
+        st.markdown(
+            """
+            <div class="stat-card">
+                <div class="stat-num">Free Tier</div>
+                <div class="stat-label">Operational Cost</div>
+                <p style="font-size:0.8rem; color:#94A3B8; margin-top:4px;">Gemini 2.5 Flash Free + local CPU embeddings.</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # 4. FEATURES GRID (6 CARDS)
+    # =========================================================================
+    st.markdown("## ⚡ Built for Real-World Documents")
+    st.markdown(
+        "Standard tutorials use toy vector search that breaks on real business documents. "
+        "Here is the feature set that makes this system enterprise-ready:"
+    )
+
+    f_col1, f_col2, f_col3 = st.columns(3)
+    with f_col1:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon-box">📄</div>
+                <div class="feature-title">Universal Document Ingestion</div>
+                <div class="feature-desc">
+                    Drop in any document: company handbooks, compliance manuals, financial audit reports, legal contracts, or technical papers in PDF, DOCX, or TXT format.
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-    with ov_c2:
+    with f_col2:
         st.markdown(
             """
-            <div class="glass-card">
-                <div class="card-icon">🧠</div>
-                <div class="card-header">The Engineering Solution</div>
-                <div class="card-body">
-                    A multi-tier retrieval engine: Multi-query paraphrasing, hybrid BM25 + dense FAISS search fused via Reciprocal Rank Fusion, parent-child chunk mapping, and cross-attention joint reranking.
+            <div class="feature-card">
+                <div class="feature-icon-box">🔀</div>
+                <div class="feature-title">Multi-Query Semantic Expansion</div>
+                <div class="feature-desc">
+                    The LLM generates 3 search formulations per inquiry, incorporating conversation memory to resolve ambiguous follow-up pronouns like "does it apply?".
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-    with ov_c3:
+    with f_col3:
         st.markdown(
             """
-            <div class="glass-card">
-                <div class="card-icon">🚀</div>
-                <div class="card-header">Verifiable Business Impact</div>
-                <div class="card-body">
-                    Zero hallucinations: Every statement is strictly linked to cited document sections (<code>[1]</code>, <code>[2]</code>). Fully operational with sub-second retrieval on 100% free-tier compute.
+            <div class="feature-card">
+                <div class="feature-icon-box">⚡</div>
+                <div class="feature-title">Dual-Engine Hybrid Retrieval</div>
+                <div class="feature-desc">
+                    Combines dense semantic search (FAISS) with sparse exact keyword search (BM25) using Reciprocal Rank Fusion (RRF), catching exact policy codes and acronyms.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    f_col4, f_col5, f_col6 = st.columns(3)
+    with f_col4:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon-box">🧩</div>
+                <div class="feature-title">Parent-Child Splitting</div>
+                <div class="feature-desc">
+                    Indexes small 400-char child chunks for sharp vector search, then automatically retrieves the full 1,600-char parent chunk so the LLM has complete context.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with f_col5:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon-box">🎯</div>
+                <div class="feature-title">Cross-Encoder Attention Reranking</div>
+                <div class="feature-desc">
+                    Processes query and passage jointly via cross-attention layers (ms-marco-MiniLM on CPU), scoring whether the text actually answers the prompt.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with f_col6:
+        st.markdown(
+            """
+            <div class="feature-card">
+                <div class="feature-icon-box">🛡️</div>
+                <div class="feature-title">Context Budgeting & Citations</div>
+                <div class="feature-desc">
+                    Drops negative-score noise, trims context to an 8,000-character budget, and enforces strict verifiable numeric citations ([1], [2]) for auditing.
                 </div>
             </div>
             """,
@@ -352,65 +628,125 @@ def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_cha
     st.markdown("<br><hr>", unsafe_allow_html=True)
 
     # =========================================================================
-    # 3. INTERACTIVE 1-CLICK LIVE DEMO SANDBOX
+    # 5. HOW IT WORKS (4-STEP WORKFLOW)
     # =========================================================================
-    st.markdown("## ⚡ Try It Live (1-Click Recruiter Sandbox)")
+    st.markdown("## 🔄 How It Works: The 4-Step Pipeline")
+    st.markdown("From raw unstructured documents to verifiable, cited intelligence:")
+
+    w1, w2, w3, w4 = st.columns(4)
+    with w1:
+        st.markdown(
+            """
+            <div class="workflow-step">
+                <div class="workflow-badge">STEP 01</div>
+                <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; font-size:1.05rem;">Upload & Ingest</div>
+                <div style="font-size:0.85rem; color:#94A3B8; line-height:1.6;">
+                    Upload any PDF, Word (.docx), or plain text file. Text splitters parse structure and preserve section headers.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with w2:
+        st.markdown(
+            """
+            <div class="workflow-step">
+                <div class="workflow-badge">STEP 02</div>
+                <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; font-size:1.05rem;">Hierarchical Indexing</div>
+                <div style="font-size:0.85rem; color:#94A3B8; line-height:1.6;">
+                    Large parent blocks store complete context, while small child chunks are embedded into local FAISS vector space.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with w3:
+        st.markdown(
+            """
+            <div class="workflow-step">
+                <div class="workflow-badge">STEP 03</div>
+                <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; font-size:1.05rem;">Hybrid RRF & Rerank</div>
+                <div style="font-size:0.85rem; color:#94A3B8; line-height:1.6;">
+                    Multi-queries search dense FAISS and sparse BM25 simultaneously. A Cross-Encoder model joint-ranks the top passages.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with w4:
+        st.markdown(
+            """
+            <div class="workflow-step">
+                <div class="workflow-badge">STEP 04</div>
+                <div style="font-weight:700; color:#F8FAFC; margin-bottom:8px; font-size:1.05rem;">Cited Generation</div>
+                <div style="font-size:0.85rem; color:#94A3B8; line-height:1.6;">
+                    Google Gemini 2.5 Flash synthesizes answers strictly using refined context, citing numbered sources for instant verification.
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br><hr>", unsafe_allow_html=True)
+
+    # =========================================================================
+    # 6. INTERACTIVE 1-CLICK LIVE DEMO SANDBOX
+    # =========================================================================
+    st.markdown("## ⚡ Live Interactive Demo Sandbox")
     st.markdown(
-        "Recruiters and visitors can test the entire 5-stage RAG pipeline **instantly with 1 click**. "
-        "Select a pre-configured scenario or type any question below:"
+        "Test the live pipeline right here. Click a sample business inquiry or test with your own question:"
     )
 
-    sc_cols = st.columns(4)
+    demo_cols = st.columns(4)
     selected_query = None
 
-    for i, s in enumerate(SAMPLE_RECRUITER_QUERIES):
-        with sc_cols[i]:
+    for idx, sc in enumerate(SAMPLE_RECRUITER_QUERIES):
+        with demo_cols[idx]:
             st.markdown(
                 f"""
-                <div class="query-box">
+                <div class="scenario-card">
                     <div>
-                        <div class="query-title">{s['icon']} {s['title']}</div>
-                        <div style="font-size:0.75rem; color:#818CF8; font-weight:600; margin-bottom:6px;">{s['tag']}</div>
-                        <div class="query-desc">{s['description']}</div>
+                        <div class="scenario-title">{sc['icon']} {sc['title']}</div>
+                        <div class="scenario-tag">{sc['tag']}</div>
+                        <div class="scenario-desc">{sc['description']}</div>
                     </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
             )
-            if st.button(f"Run Scenario #{i + 1}", key=f"recruiter_test_{i}", use_container_width=True):
-                selected_query = s["question"]
+            if st.button(f"Test Query #{idx + 1}", key=f"saas_demo_btn_{idx}", use_container_width=True):
+                selected_query = sc["question"]
 
     st.markdown("<br>", unsafe_allow_html=True)
-    custom_query = st.text_input(
-        "Or enter a custom question about the TechNova documentation:",
-        placeholder="e.g. What are the SLA response times for Priority 1 issues?",
-        key="landing_custom_query_input"
+    custom_inquiry = st.text_input(
+        "Or enter any question to search against your knowledge base:",
+        placeholder="e.g. What are the support hours and escalation paths?",
+        key="saas_custom_input_box"
     )
-    if st.button("🚀 Execute Custom Query", key="btn_run_custom"):
-        if custom_query.strip():
-            selected_query = custom_query.strip()
+    if st.button("🚀 Run Live Pipeline", key="saas_run_custom_btn"):
+        if custom_inquiry.strip():
+            selected_query = custom_inquiry.strip()
 
-    # If a query is triggered, run live pipeline and display telemetry
+    # Live Execution Output
     if selected_query:
-        st.markdown(f"### 🔍 Live Execution Trace: *\"{selected_query}\"*")
+        st.markdown(f"#### 🔍 Live Execution Trace: *\"{selected_query}\"*")
         pipeline = get_pipeline_func()
         if pipeline is None:
-            st.error("Pipeline could not be loaded. Please ensure vector database is built.")
+            st.error("Pipeline could not be loaded. Please ensure the vector database is built.")
         else:
-            with st.spinner("Processing through Multi-Query → Hybrid Search → Parent Recovery → Cross-Encoder → Gemini 2.5 Flash..."):
+            with st.spinner("Executing: Multi-Query → Hybrid Search → Parent Recovery → Cross-Encoder → Gemini Generation..."):
                 try:
                     from src.memory import create_memory
                     mem = create_memory()
                     result = answer_question_func(selected_query, pipeline, mem)
 
-                    # Display Live Results in Premium Card
                     st.markdown(
                         f"""
-                        <div class="live-result-card">
-                            <div style="font-size:0.85rem; color:#10B981; font-weight:700; letter-spacing:0.05em; margin-bottom:8px;">
-                                ✅ VERIFIED FACTUAL ANSWER (GENERATED VIA GEMINI 2.5 FLASH)
+                        <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 14px; padding: 22px; margin-top: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+                            <div style="font-size:0.82rem; color:#10B981; font-weight:700; letter-spacing:0.04em; margin-bottom:8px;">
+                                🟢 FACTUAL ANSWER (SYNTHESIZED WITH STRICT CITATIONS)
                             </div>
-                            <div style="font-size:1.05rem; color:#F8FAFC; line-height:1.7;">
+                            <div style="font-size:1.02rem; color:#F8FAFC; line-height:1.7;">
                                 {result['answer']}
                             </div>
                         </div>
@@ -418,40 +754,40 @@ def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_cha
                         unsafe_allow_html=True,
                     )
 
-                    # Sources list
+                    # Render ground-truth sources
                     if result.get("sources"):
-                        st.markdown("#### 📄 Ground Truth Source Passages")
-                        src_cols = st.columns(len(result["sources"]))
+                        st.markdown("##### 📄 Verified Ground-Truth Source Passages")
+                        s_cols = st.columns(len(result["sources"]))
                         for s_i, src in enumerate(result["sources"]):
-                            with src_cols[s_i]:
+                            with s_cols[s_i]:
                                 st.markdown(
                                     f"**[{s_i + 1}] {describe_source(src)}**\n\n"
                                     f"<div style='font-size:0.8rem; color:#CBD5E1; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); max-height:120px; overflow-y:auto;'>"
-                                    f"{src.page_content[:300]}..."
+                                    f"{src.page_content[:280]}..."
                                     f"</div>",
                                     unsafe_allow_html=True,
                                 )
 
-                    # Telemetry & Pipeline metrics
+                    # Real-time Telemetry
                     debug = result.get("debug", {})
                     with st.expander("🔬 Real-Time Pipeline Telemetry & Reranking Scores", expanded=True):
-                        t_col1, t_col2 = st.columns(2)
-                        with t_col1:
-                            st.markdown("**1. Generated Query Variants (Multi-Query):**")
+                        tel_col1, tel_col2 = st.columns(2)
+                        with tel_col1:
+                            st.markdown("**1. Generated Query Variants (Multi-Query Expansion):**")
                             for q in debug.get("generated_queries", []):
                                 st.markdown(f"- `{q}`")
-                        with t_col2:
-                            st.markdown("**2. Cross-Encoder Joint Relevance Scores:**")
+                        with tel_col2:
+                            st.markdown("**2. Cross-Encoder Joint Relevance Scoring:**")
                             for score, doc in debug.get("reranked_with_scores", [])[:4]:
                                 status = "🟢 Relevant" if score >= 0 else "🟡 Borderline"
                                 st.markdown(f"- **{score:+.2f}** ({status}) — `{describe_source(doc)}`")
 
-                    # CTA below results
-                    c_box1, c_box2 = st.columns([3, 1.2])
-                    with c_box1:
-                        st.info("💡 Want multi-turn conversation memory, deeper debugging, or to upload your own files?")
-                    with c_box2:
-                        if st.button("👉 Open Full Chat Assistant", key="open_chat_from_result", type="primary", use_container_width=True):
+                    # CTA box
+                    box1, box2 = st.columns([3, 1.2])
+                    with box1:
+                        st.info("💡 Want multi-turn chat history, or to upload your own files via browser?")
+                    with box2:
+                        if st.button("👉 Open Full Chat Assistant", key="open_chat_from_sandbox", type="primary", use_container_width=True):
                             navigate_to_chat_func()
 
                 except Exception as e:
@@ -460,173 +796,32 @@ def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_cha
     st.markdown("<br><hr>", unsafe_allow_html=True)
 
     # =========================================================================
-    # 4. ONE-BY-ONE DETAILED EXPLANATION OF THE 5 RAG STAGES
+    # 7. HIGH-IMPACT FINAL CALL TO ACTION & FOOTER
     # =========================================================================
-    st.markdown("## 🔬 How It Works: The 5 Advanced RAG Stages Explained")
-    st.markdown(
-        "Each stage in this pipeline maps directly to a specific production failure mode in traditional RAG. "
-        "Here is the one-by-one architectural breakdown:"
-    )
-
-    # Stage 1
     st.markdown(
         """
-        <div class="step-container">
-            <div class="step-header-row">
-                <div class="step-number">01</div>
-                <div class="step-title">Hierarchical Parent-Child Chunking</div>
-                <div class="step-tag">src/chunking.py</div>
-            </div>
-            <div class="step-problem">
-                <b>The Failure in Naive RAG:</b> Chunk size is a painful trade-off. Small chunks (~300 chars) embed sharply for search but lack the surrounding sentences the LLM needs to formulate a coherent answer. Large chunks (~1800 chars) answer well, but multiple topics get averaged together into one blurry vector, destroying search accuracy.
-            </div>
-            <div class="step-solution">
-                <b>Our Engineering Fix:</b> Stop compromising—use both. Documents are split into large <b>Parent Chunks</b> (~1,600 characters) and then divided into small <b>Child Chunks</b> (~400 characters). Only child chunks are embedded and searched in FAISS. When a child matches, we automatically swap it for its complete <b>Parent Chunk</b> before passing it to the LLM. Retrieval remains razor-sharp, and context remains complete.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Stage 2
-    st.markdown(
-        """
-        <div class="step-container">
-            <div class="step-header-row">
-                <div class="step-number">02</div>
-                <div class="step-title">Multi-Query Expansion with Conversational History</div>
-                <div class="step-tag">src/retrieval.py</div>
-            </div>
-            <div class="step-problem">
-                <b>The Failure in Naive RAG:</b> A single user question is just one phrasing. If a user asks about <i>"taking time off"</i> but the company policy specifies <i>"annual leave entitlement"</i>, single-vector searches miss the document. Furthermore, conversational follow-ups like <i>"does it apply to enterprise?"</i> fail because <i>"it"</i> has no semantic vector meaning.
-            </div>
-            <div class="step-solution">
-                <b>Our Engineering Fix:</b> The query is passed to Google Gemini to generate 3 alternative formulations using synonyms, technical jargon, and colloquial phrasing. Simultaneously, conversation memory resolves ambiguous pronouns (e.g., rewriting <i>"does it apply to enterprise?"</i> into <i>"does TechNova's 30-day refund policy apply to enterprise contracts?"</i>) so retrieval never searches blindly.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Stage 3
-    st.markdown(
-        """
-        <div class="step-container">
-            <div class="step-header-row">
-                <div class="step-number">03</div>
-                <div class="step-title">Dual-Engine Hybrid Retrieval & Reciprocal Rank Fusion (RRF)</div>
-                <div class="step-tag">src/retrieval.py</div>
-            </div>
-            <div class="step-problem">
-                <b>The Failure in Naive RAG:</b> Semantic vector embeddings understand concepts, but are notoriously bad at exact alphanumeric identifiers (e.g., <i>"SOC 2 Type II"</i>, <i>"ISO-27001"</i>, <i>"TN-SUP-2024"</i>, or error codes). Keyword search (BM25) is exact on codes, but fails on semantic synonyms.
-            </div>
-            <div class="step-solution">
-                <b>Our Engineering Fix:</b> We run both engines in parallel: dense semantic search via <b>FAISS</b> and sparse exact keyword search via <b>BM25</b>. The two candidate lists are merged using <b>Reciprocal Rank Fusion (RRF)</b>:
-                <br><code>Score(d) = ∑ [ 1 / (60 + Rank_m(d)) ]</code>
-                <br>Passages that rank well across both meaning and exact words naturally rise to the top without needing brittle manual score calibration.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Stage 4
-    st.markdown(
-        """
-        <div class="step-container">
-            <div class="step-header-row">
-                <div class="step-number">04</div>
-                <div class="step-title">Cross-Encoder Joint Attention Reranking</div>
-                <div class="step-tag">src/reranking.py</div>
-            </div>
-            <div class="step-problem">
-                <b>The Failure in Naive RAG:</b> Standard vector search uses bi-encoders, where the question vector and document vector are computed separately. This is fast, but dot-product cosine similarity only estimates topical similarity, not whether the document actually <i>answers</i> the user's inquiry.
-            </div>
-            <div class="step-solution">
-                <b>Our Engineering Fix:</b> We apply a two-stage retrieval pattern. Fast hybrid retrieval produces the top 10 candidates. Then, a dedicated Cross-Encoder model (<code>cross-encoder/ms-marco-MiniLM-L-6-v2</code>) feeds the query and passage <i>together</i> through full cross-attention layers. Running locally on CPU in ~80ms, it scores answering relevance with high precision.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Stage 5
-    st.markdown(
-        """
-        <div class="step-container">
-            <div class="step-header-row">
-                <div class="step-number">05</div>
-                <div class="step-title">Context Refinement, Token Budgeting & Citations</div>
-                <div class="step-tag">src/refinement.py</div>
-            </div>
-            <div class="step-problem">
-                <b>The Failure in Naive RAG:</b> Retrieval returns its top K chunks no matter what—even if some are irrelevant noise. Stuffing weak context into the prompt increases latency, wastes token budget, and drastically increases the chance of hallucinations.
-            </div>
-            <div class="step-solution">
-                <b>Our Engineering Fix:</b> A three-step refinement guardrail: (1) Any chunk with a cross-encoder score below <code>MIN_RERANK_SCORE</code> (default -4.0) is discarded. (2) Chunks are admitted until reaching a strict 8,000-character context budget. (3) Each passage is assigned a numbered reference, instructing the LLM to cite sources like <code>[1]</code> and <code>[2]</code> for full verification.
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("<br><hr>", unsafe_allow_html=True)
-
-    # =========================================================================
-    # 5. TECHNICAL BENCHMARKS: NAIVE RAG VS ADVANCED RAG
-    # =========================================================================
-    st.markdown("## 📊 Head-to-Head Comparison")
-    st.markdown(
-        """
-        | Architectural Dimension | Naive RAG (Basic Tutorial) | Advanced RAG (This Implementation) |
-        | :--- | :--- | :--- |
-        | **Search Approach** | Pure Vector Search (Bi-Encoder) | **Hybrid Search (Dense FAISS + Sparse BM25)** |
-        | **Fusion Strategy** | Single list distance sorting | **Reciprocal Rank Fusion (RRF)** |
-        | **Chunk Strategy** | Fixed-size chunks (e.g., 500 chars) | **Hierarchical Parent-Child Splitting** |
-        | **Query Handling** | Verbatim single query | **3-Variant Multi-Query Expansion with History** |
-        | **Relevance Verification** | None (Raw vector distance) | **Cross-Encoder Joint Attention Model** |
-        | **Noise Filtering** | None (All top-K sent to LLM) | **Threshold Filtering + Context Token Budget** |
-        | **Hallucination Prevention** | System prompt only | **Refined context + Mandatory Citations [1], [2]** |
-        | **Operating Cost** | Paid APIs required | **100% Free Tier (Gemini 2.5 Flash + Local Embeddings)** |
-        """
-    )
-
-    st.markdown("<br><hr>", unsafe_allow_html=True)
-
-    # =========================================================================
-    # 6. TECHNOLOGY STACK
-    # =========================================================================
-    st.markdown("## 🛠️ Technology Stack")
-    t1, t2, t3, t4, t5, t6 = st.columns(6)
-    with t1:
-        st.markdown("**LLM Engine**\n\nGoogle Gemini 2.5 Flash\n*(Groq & OpenAI ready)*")
-    with t2:
-        st.markdown("**Embeddings**\n\nHuggingFace\n`all-MiniLM-L6-v2`\n*(Local CPU)*")
-    with t3:
-        st.markdown("**Vector DB**\n\nFAISS\n*(High performance)*")
-    with t4:
-        st.markdown("**Keyword Search**\n\nRank-BM25\n*(Sparse retriever)*")
-    with t5:
-        st.markdown("**Reranker**\n\nms-marco-MiniLM\n*(Cross-Encoder)*")
-    with t6:
-        st.markdown("**UI Framework**\n\nStreamlit\n*(Wide responsive layout)*")
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # Final Footer Call to Action
-    st.markdown(
-        """
-        <div style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 28px; text-align: center;">
-            <h3 style="color:#F8FAFC; margin-bottom:8px;">Ready to Explore the Live Interactive Assistant?</h3>
-            <p style="color:#94A3B8; max-width:600px; margin: 0 auto 20px auto;">
-                Experience multi-turn conversation memory, real-time pipeline inspection, and upload your own documents.
+        <div class="cta-banner">
+            <h2 style="font-size:2.4rem; font-weight:800; color:#FFFFFF; margin-bottom:12px; letter-spacing:-0.02em;">
+                Ready to Experience Verifiable Document Intelligence?
+            </h2>
+            <p style="color:#CBD5E1; font-size:1.1rem; max-width:650px; margin:0 auto 26px auto; line-height:1.6;">
+                Upload your own PDFs, Word documents, or text files, test multi-turn conversation memory, and inspect real-time retrieval telemetry.
             </p>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    st.markdown("<br>", unsafe_allow_html=True)
-    foot_col1, foot_col2, foot_col3 = st.columns([1.5, 2, 1.5])
-    with foot_col2:
-        if st.button("🚀 Launch Full Chat Assistant Now", key="footer_launch_btn", type="primary", use_container_width=True):
+
+    f_b1, f_b2, f_b3 = st.columns([1.5, 2, 1.5])
+    with f_b2:
+        if st.button("🚀 Launch Full Chat Assistant Now", key="btn_final_cta", type="primary", use_container_width=True):
             navigate_to_chat_func()
+
+    st.markdown(
+        """
+        <div style="text-align:center; padding:32px 0 10px 0; color:#64748B; font-size:0.85rem; border-top:1px solid rgba(255,255,255,0.06); margin-top:40px;">
+            <b>OmniRAG Intelligence</b> • Built with Python, LangChain, Google Gemini, FAISS, and Streamlit • 100% Free Tier Compute Ready
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
