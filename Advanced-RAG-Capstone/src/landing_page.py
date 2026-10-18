@@ -13,7 +13,7 @@ Built with a modern AI/SaaS startup aesthetic:
 
 import streamlit as st
 from src.indexing import index_summary
-from src.refinement import describe_source
+
 
 
 # General enterprise sample scenarios that demonstrate diverse document capabilities
@@ -756,17 +756,9 @@ def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_cha
 
                     # Render ground-truth sources
                     if result.get("sources"):
-                        st.markdown("##### 📄 Verified Ground-Truth Source Passages")
-                        s_cols = st.columns(len(result["sources"]))
-                        for s_i, src in enumerate(result["sources"]):
-                            with s_cols[s_i]:
-                                st.markdown(
-                                    f"**[{s_i + 1}] {describe_source(src)}**\n\n"
-                                    f"<div style='font-size:0.8rem; color:#CBD5E1; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); max-height:120px; overflow-y:auto;'>"
-                                    f"{src.page_content[:280]}..."
-                                    f"</div>",
-                                    unsafe_allow_html=True,
-                                )
+                        st.markdown("##### 📄 Verified Ground-Truth Sources")
+                        for s_i, src_name in enumerate(result["sources"], start=1):
+                            st.markdown(f"- **[{s_i}]** `{src_name}`")
 
                     # Real-time Telemetry
                     debug = result.get("debug", {})
@@ -778,9 +770,19 @@ def render_landing_page(get_pipeline_func, answer_question_func, navigate_to_cha
                                 st.markdown(f"- `{q}`")
                         with tel_col2:
                             st.markdown("**2. Cross-Encoder Joint Relevance Scoring:**")
-                            for score, doc in debug.get("reranked_with_scores", [])[:4]:
-                                status = "🟢 Relevant" if score >= 0 else "🟡 Borderline"
-                                st.markdown(f"- **{score:+.2f}** ({status}) — `{describe_source(doc)}`")
+                            for chunk in debug.get("reranked", [])[:4]:
+                                score = chunk.get("score")
+                                score_val = f"{score:+.3f}" if score is not None else "N/A"
+                                status = "🟢 Relevant" if (score is not None and score >= 0) else "🟡 Borderline"
+                                st.markdown(f"- **{score_val}** ({status}) — `{chunk.get('source')}`")
+
+                    # Final context preview
+                    final_context = debug.get("final_context", [])
+                    if final_context:
+                        with st.expander("📖 Ground-Truth Context Passages Sent to LLM", expanded=False):
+                            for fc_i, fc in enumerate(final_context, start=1):
+                                st.markdown(f"**[{fc_i}] {fc.get('source')}**")
+                                st.text(fc.get("preview", "")[:350] + "...")
 
                     # CTA box
                     box1, box2 = st.columns([3, 1.2])
